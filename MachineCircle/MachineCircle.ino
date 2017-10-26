@@ -19,7 +19,8 @@ const int LIMIT_SWITCH_Z = 11;
 const int SPINDLE_ENABLE = 12;
 const int SPINDLE_DIRECTION = 13;
 
-
+const int mmCutPerRotation = 3.175; // 1/8 in in each revolution
+const float mmPerRev = 1.27; // 1/4-20 screws, .05 in per revolution, 1.27 mm per revolution
 
 //
 // create the stepper motor object
@@ -74,31 +75,19 @@ void setup()
 //
 void loop()
 {
-  //
-  // set the speed in steps/second and acceleration in steps/second/second
-  //
-  int SPEED = 200;
-  stepperY.setSpeedInStepsPerSecond(50);
-  stepperY.setAccelerationInStepsPerSecondPerSecond(800);
-  stepperY.setStepsPerRevolution(200);            // 200 for no microstepping
-  stepperX.setSpeedInStepsPerSecond(SPEED);
-  stepperX.setAccelerationInStepsPerSecondPerSecond(800);
-  stepperX.setStepsPerRevolution(200);            // 200 for no microstepping
-  stepperZ.setSpeedInStepsPerSecond(SPEED);
-  stepperZ.setAccelerationInStepsPerSecondPerSecond(800);
-  stepperZ.setStepsPerRevolution(200);            // 200 for no microstepping
+  stepperX.setStepsPerRevolution(200);
+  stepperY.setStepsPerRevolution(200);
+  stepperX.setSpeedInRevolutionsPerSecond(0.5);
+  stepperY.setSpeedInRevolutionsPerSecond(0.1);
+  stepperX.setAccelerationInRevolutionsPerSecondPerSecond(1);
+  stepperY.setAccelerationInRevolutionsPerSecondPerSecond(1);
 
-  //
-  // move motor continuously
-  //
-  stepperY.setupRelativeMoveInRevolutions(40);
-  stepperX.setupRelativeMoveInRevolutions(40);
-  stepperZ.setupRelativeMoveInRevolutions(-40);
-  while(1){
-    stepperY.processMovement();
-    stepperX.processMovement();
-    stepperZ.processMovement();
-  }
+  stepperX.moveRelativeInRevolutions(-50); 
+  
+  while(0){
+    //stepperY.moveRelativeInRevolutions(1);
+    //stepperX.moveRelativeInRevolutions(-mmCutPerRotation/mmPerRev);      
+  }  
   
 }
 
