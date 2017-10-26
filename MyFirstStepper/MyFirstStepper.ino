@@ -92,12 +92,12 @@ void loop()
   // move motor continuously
   //
   stepperY.setupRelativeMoveInRevolutions(40);
-  stepperX.setupRelativeMoveInRevolutions(40);
-  stepperZ.setupRelativeMoveInRevolutions(-40);
+  //stepperX.setupRelativeMoveInRevolutions(40);
+  //stepperZ.setupRelativeMoveInRevolutions(-40);
   while(1){
     stepperY.processMovement();
-    stepperX.processMovement();
-    stepperZ.processMovement();
+    //stepperX.processMovement();
+    //stepperZ.processMovement();
   }
   
 }
