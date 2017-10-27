@@ -19,10 +19,12 @@ const int LIMIT_SWITCH_Z = 11;
 const int SPINDLE_ENABLE = 12;
 const int SPINDLE_DIRECTION = 13;
 
-const float r = 100; // radius of stock in mm
+const float r = 48; // radius of stock in mm
 const float mmPerRev = 1.27; // 1/4-20 screws, .05 in per revolution, 1.27 mm per revolution
+const float maxCut = 3.175; // max cut depth in mm ( 1/8 in)
 
-const int horizontalRevsPerSecond = 10;
+const int horizontalRevsPerSecond = 10; // constant horizontal revs/second
+const int horizontalAccel = 2; // constant horizontal accel in revs/second/second
 
 
 
@@ -77,37 +79,51 @@ void setup()
 //
 void loop()
 {
+  delay(5000);
+  
   // calculate max depth of cut to make flat from cylindrical stock in mm
   float depth = r*0.29;
+  float steps = depth/maxCut;
 
   // set the microstepping and acceleration in steps/second/second
-  int commonAccel = 200; // acceleration of both steppers in steps/second/second
-  int commonStepsPerRev = 200; // steps per revolution, 200 for no microstepping
-  stepperY.setAccelerationInStepsPerSecondPerSecond(commonAccel);
-  stepperY.setStepsPerRevolution(commonStepsPerRev);
-  stepperX.setAccelerationInStepsPerSecondPerSecond(commonAccel);
-  stepperX.setStepsPerRevolution(commonStepsPerRev);
+  int xAccel = 4; // acceleration of x stepper in revs/second/second
+  int yAccel = 1; // acceleration of y stepper in revs/second/second
+  int xStepsPerRev = 200; // steps per revolution, 200 for no microstepping
+  int yStepsPerRev = 3200; // steps per revolution, 200 for no microstepping
+  stepperY.setAccelerationInRevolutionsPerSecondPerSecond(yAccel);
+  stepperY.setStepsPerRevolution(yStepsPerRev);
+  stepperX.setAccelerationInRevolutionsPerSecondPerSecond(xAccel);
+  stepperX.setStepsPerRevolution(xStepsPerRev);
 
-  // calculate speeds, set speeds in steps/second
-  float horizontalRevs = depth/mmPerRev;
-  float secondsToRun = horizontalRevs/horizontalRevsPerSecond;
-  int rotationalSPEED = commonStepsPerRev/8/secondsToRun; // speed of x stepper in steps/second
-  int horizontalSPEED = commonStepsPerRev*horizontalRevsPerSecond; // speed of y stepper in steps/second
-  stepperX.setSpeedInStepsPerSecond(horizontalSPEED);
-  stepperY.setSpeedInStepsPerSecond(rotationalSPEED);
+  for(int i=0;i<ceil(steps);i++){
+    // calculate speeds, set speeds in steps/second
+    float horizontalRevs = (i+1)*maxCut/mmPerRev;
+    if(i==ceil(steps)-1){
+      horizontalRevs = depth/mmPerRev;
+    }
+    float secondsToRun = horizontalRevs/horizontalRevsPerSecond;
+    int rotationalSPEED = yStepsPerRev/8/secondsToRun; // speed of x stepper in steps/second
+    int horizontalSPEED = xStepsPerRev*horizontalRevsPerSecond; // speed of y stepper in steps/second
+    stepperX.setSpeedInStepsPerSecond(horizontalSPEED);
+    stepperY.setSpeedInStepsPerSecond(rotationalSPEED);
 
-  // move in and out while turning, god I hope this shit works...
-  stepperX.setupRelativeMoveInRevolutions(horizontalRevs);
-  stepperY.setupRelativeMoveInRevolutions(0.125);
-  while((!stepper1.motionComplete()) || (!stepper2.motionComplete())){
-    stepperX.processMovement();
-    stepperY.processMovement();
-  }
-  stepperX.setupRelativeMoveInRevolutions(-horizontalRevs);
-  stepperY.setupRelativeMoveInRevolutions(0.125);
-  while((!stepper1.motionComplete()) || (!stepper2.motionComplete())){
-    stepperX.processMovement();
-    stepperY.processMovement();
+    // stepperX.setAccelerationInRevolutionsPerSecondPerSecond(horizontalAccel);
+    // stepperY.setAccelerationInRevolutionsPerSecondPerSecond(horizontalAccel*(rotationalSPEED/horizontalSPEED));
+  
+    // move in and out while turning, god I hope this shit works...
+    stepperX.setupRelativeMoveInRevolutions(horizontalRevs);
+    stepperY.setupRelativeMoveInRevolutions(0.125);
+    while((!stepperX.motionComplete()) || (!stepperY.motionComplete())){
+      stepperX.processMovement();
+      stepperY.processMovement();
+    }
+    stepperX.setupRelativeMoveInRevolutions(-horizontalRevs);
+    stepperY.setupRelativeMoveInRevolutions(0.125);
+    while((!stepperX.motionComplete()) || (!stepperY.motionComplete())){
+      stepperX.processMovement();
+      stepperY.processMovement();
+    }
+    stepperY.moveRelativeInRevolutions(-.25);
   }
   
 }
