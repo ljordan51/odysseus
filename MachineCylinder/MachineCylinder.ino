@@ -20,16 +20,18 @@ const int SPINDLE_ENABLE = 12;
 const int SPINDLE_DIRECTION = 13;
 
 const int mmCutPerRotation = 3.175; // 1/8 in in each revolution
-const float mmPerRevHor = 1.27; // 1/4-20 screws, .05 in per revolution, 1.27 mm per revolution
-const float mmPerRevVert = 1.5875; // pitch 16 screws, .0625 in per rev, 1.5875 mm per rev
-const float partHeight = 150; // part height in mm
-const float totalCutDepth = 30; // mm distance to move in overall during entire operation
-const float bitSize = 0.25*25.4; // bit size inches * mm/in
-const float feedRate = 30; // vertical feed rate in mm/sec
+const float mmPerRevHor = 1.5875; // 1/4-20 screws, .05 in per revolution, 1.27 mm per revolution
+const float mmPerRevVert = 8; // pitch 16 screws, .0625 in per rev, 1.5875 mm per rev
+const float partHeight = 30; // part height in mm
+const float totalCutDepth = 5; // mm distance to move in overall during entire operation
+const float bitSize = 0.313*25.4; // bit size inches * mm/in
+const float feedRate = 5; // vertical feed rate in mm/sec
 const int microX = 1;
-const int microY = 16;
+const int microY = 1;
 const int microZ = 1;
 const int standardStepsPerRev = 200;
+
+bool notDone = true;
 
 //
 // create the stepper motor object
@@ -102,23 +104,28 @@ void loop()
 
   float numRotations = (partHeight/feedRate)*rotationsPerSec;
 
-  for(int i=0;i<numCuts;i++){
-    float cutDepth = mmCutPerRotation;
-    if(i==numCuts-1){
-      cutDepth = (totalCutDepth/mmCutPerRotation-floor(totalCutDepth/mmCutPerRotation))*mmCutPerRotation;
+  while(notDone){
+    for(int i=0;i<numCuts;i++){
+      float cutDepth = mmCutPerRotation;
+      if(i==numCuts-1){
+        cutDepth = (totalCutDepth/mmCutPerRotation-floor(totalCutDepth/mmCutPerRotation))*mmCutPerRotation;
+      }
+      stepperX.moveRelativeInMillimeters(cutDepth);
+      
+      stepperY.setupRelativeMoveInRevolutions(numRotations);
+      stepperZ.setupRelativeMoveInMillimeters(partHeight);
+  
+      while((!stepperY.motionComplete()) || (!stepperZ.motionComplete())){
+        stepperY.processMovement();
+        stepperZ.processMovement();
+      }
+  
+      stepperZ.moveRelativeInMillimeters(-partHeight);
     }
-    stepperX.moveRelativeInMillimeters(cutDepth);
-    
-    stepperY.setupRelativeMoveInRevolutions(numRotations);
-    stepperZ.setupRelativeMoveInMillimeters(partHeight);
-
-    while((!stepperY.motionComplete()) || (!stepperZ.motionComplete())){
-      stepperY.processMovement();
-      stepperZ.processMovement();
-    }
-
-    stepperZ.moveRelativeInMillimeters(-partHeight);
+    notDone = false;
   }
+
+  Serial.println("Odysseus...");
   
 }
 
