@@ -80,7 +80,8 @@ void setup()
  
  
   Serial.begin(9600);
-  Serial.println ("Hit a key to start");     // signal initalization done
+  Serial.println();
+  Serial.println("Hit a key and press enter to start");     // signal initalization done
   while(Serial.available() == 0){}
 }
 
