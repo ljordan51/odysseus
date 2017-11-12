@@ -76,7 +76,7 @@ void loop()
   stepperX.setSpeedInRevolutionsPerSecond(1);
   stepperX.setAccelerationInRevolutionsPerSecondPerSecond(10);
 
-  stepperX.moveRelativeInRevolutions(-100); 
+  stepperZ.moveRelativeInRevolutions(-100); 
   
 }
 

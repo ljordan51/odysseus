@@ -20,7 +20,6 @@ const int SPINDLE_ENABLE = 12;
 const int SPINDLE_DIRECTION = 13;
 
 bool notDone = true;
-int count = 0;
 
 //
 // create the stepper motor object
@@ -80,27 +79,19 @@ void loop()
 {
 
   while(notDone){
-    int dir = (2*(count%2)-1);
     stepperZ.setStepsPerRevolution(800); // currently set to 4x microstepping
     stepperZ.setSpeedInRevolutionsPerSecond(5); // start slow
     stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(1); // random acceleration
-    stepperZ.setTargetPositionRelativeInRevolutions(dir*15); // just run for a while idk
+    stepperZ.setTargetPositionRelativeInRevolutions(10); // just run for a while idk
     unsigned long start_time = millis();
 
     while(!stepperZ.motionComplete()){
       unsigned long cur_time = millis()-start_time;
-//      if(cur_time > 3000){ // dynamically change acceleration
-//        stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(50);
-//      }
-//      stepperZ.setSpeedInRevolutionsPerSecond(1*(1+cur_time/1000)); // uncomment for scaling speed as func of time
-//      if(cur_time > 1000 && cur_time < 2000){ // uncomment for discrete steps of increasing speed
-//        stepperZ.setSpeedInRevolutionsPerSecond(5);
-//      } else if(cur_time > 2000) {
-//        stepperZ.setSpeedInRevolutionsPerSecond(10);
-//      }
+      if(cur_time > 3000){
+        stepperZ.setTargetPositionRelativeInRevolutions(-10);
+      }
       stepperZ.processMovement();
     }
-    count++;
   }
   
 }
