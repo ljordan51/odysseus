@@ -31,7 +31,7 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:formula
+LIBS:odysseusShield-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -143,28 +143,28 @@ $EndComp
 $Comp
 L GND #PWR03
 U 1 1 5A064617
-P 2850 1750
-F 0 "#PWR03" H 2850 1500 50  0001 C CNN
-F 1 "GND" H 2850 1600 50  0000 C CNN
-F 2 "" H 2850 1750 50  0001 C CNN
-F 3 "" H 2850 1750 50  0001 C CNN
-	1    2850 1750
+P 3350 1950
+F 0 "#PWR03" H 3350 1700 50  0001 C CNN
+F 1 "GND" H 3350 1800 50  0000 C CNN
+F 2 "" H 3350 1950 50  0001 C CNN
+F 3 "" H 3350 1950 50  0001 C CNN
+	1    3350 1950
 	1    0    0    -1  
 $EndComp
 $Comp
 L +12V #PWR04
 U 1 1 5A064633
-P 2700 1750
-F 0 "#PWR04" H 2700 1600 50  0001 C CNN
-F 1 "+12V" H 2700 1890 50  0000 C CNN
-F 2 "" H 2700 1750 50  0001 C CNN
-F 3 "" H 2700 1750 50  0001 C CNN
-	1    2700 1750
+P 2850 1750
+F 0 "#PWR04" H 2850 1600 50  0001 C CNN
+F 1 "+12V" H 2850 1890 50  0000 C CNN
+F 2 "" H 2850 1750 50  0001 C CNN
+F 3 "" H 2850 1750 50  0001 C CNN
+	1    2850 1750
 	1    0    0    -1  
 $EndComp
-Text Label 2700 1750 3    60   ~ 0
+Text Label 2850 1750 3    60   ~ 0
 Relay+
-Text Label 2850 1750 0    60   ~ 0
+Text Label 3350 1950 0    60   ~ 0
 HE_GND
 Text Label 2500 1750 3    60   ~ 0
 HE_VCC
@@ -322,9 +322,6 @@ NoConn ~ 1500 4750
 NoConn ~ 1500 4650
 NoConn ~ 1500 4550
 NoConn ~ 1500 4450
-NoConn ~ 1500 3950
-NoConn ~ 1500 3850
-NoConn ~ 1500 3750
 NoConn ~ 1500 3650
 NoConn ~ 1500 3550
 NoConn ~ 1500 3450
@@ -347,4 +344,45 @@ NoConn ~ 1500 1850
 NoConn ~ 1500 1750
 NoConn ~ 1500 1650
 NoConn ~ -2000 2550
+$Comp
+L Conn_01x07 J3
+U 1 1 5A0F7574
+P 2300 4000
+F 0 "J3" H 2300 4400 50  0000 C CNN
+F 1 "Conn_01x07" H 2300 3600 50  0000 C CNN
+F 2 "odysseusWindows:Header_P2.54mm_7" H 2300 4000 50  0001 C CNN
+F 3 "" H 2300 4000 50  0001 C CNN
+	1    2300 4000
+	-1   0    0    1   
+$EndComp
+Text Label 2500 3700 0    60   ~ 0
+Fan+
+Text Label 2500 3800 0    60   ~ 0
+Fan-
+Text Label 2500 3900 0    60   ~ 0
+Joy+
+Text Label 2500 4000 0    60   ~ 0
+Joy-
+Text Label 2500 4100 0    60   ~ 0
+Joy1
+Text Label 2500 4200 0    60   ~ 0
+Joy2
+Text Label 2500 4300 0    60   ~ 0
+Joy3
+Text Label 2850 1750 0    60   ~ 0
+Fan+
+Text Label 3350 1950 1    60   ~ 0
+Fan-
+Text Label 3350 1850 0    60   ~ 0
+Joy-
+Wire Wire Line
+	3350 1950 3350 1850
+Text Label 2500 1750 0    60   ~ 0
+Joy+
+Text Label 1500 3750 0    60   ~ 0
+Joy3
+Text Label 1500 3850 0    60   ~ 0
+Joy2
+Text Label 1500 3950 0    60   ~ 0
+Joy1
 $EndSCHEMATC

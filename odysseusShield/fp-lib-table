@@ -1,3 +1,4 @@
 (fp_lib_table
   (lib (name odysseus)(type KiCad)(uri /home/lucky/Desktop/odysseus.pretty)(options "")(descr ""))
+  (lib (name odysseusWindows)(type KiCad)(uri C:/Users/ljordan/Desktop/Olin/Classes/Y2S1/POE/odysseus/odysseusShield/odysseusShield.pretty)(options "")(descr ""))
 )
