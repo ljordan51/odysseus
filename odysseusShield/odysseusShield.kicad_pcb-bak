@@ -1,11 +1,11 @@
 (kicad_pcb (version 4) (host pcbnew 4.0.7)
 
   (general
-    (links 21)
+    (links 0)
     (no_connects 0)
-    (area 142.164999 96.444999 195.655001 146.125001)
+    (area 140.079981 96.444999 195.655001 146.125001)
     (thickness 1.6)
-    (drawings 8)
+    (drawings 9)
     (tracks 58)
     (zones 0)
     (modules 7)
@@ -252,7 +252,7 @@
     (tags SOT-23)
     (path /5A063FB1)
     (attr smd)
-    (fp_text reference Q2 (at 0 -2.5 90) (layer F.SilkS)
+    (fp_text reference Q2 (at -1.27 -2.5 90) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value SSM3K333R (at 0 2.5 90) (layer F.Fab) hide
@@ -315,7 +315,7 @@
     (tags SOT-23)
     (path /5A064039)
     (attr smd)
-    (fp_text reference Q1 (at 0 -2.5) (layer F.SilkS)
+    (fp_text reference Q1 (at 1.27 -2.5) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value SSM3K333R (at 0 2.5) (layer F.Fab) hide
@@ -438,6 +438,9 @@
       (net 22 +12V))
   )
 
+  (gr_text "Alex Chapman\nAnil Patel\nLucky Jordan (PCB Designer)\nNathan Lepore\nSean Szymanski\nOdysseus Shield V1\n11/17/2017\nOlin College of Engineering POE" (at 149.86 129.54) (layer F.SilkS)
+    (effects (font (size 1.5 1.5) (thickness 0.3)) (justify left))
+  )
   (gr_line (start 194.31 146.05) (end 143.51 146.05) (layer Edge.Cuts) (width 0.15))
   (gr_line (start 195.58 97.79) (end 195.58 144.78) (layer Edge.Cuts) (width 0.15))
   (gr_line (start 143.51 96.52) (end 194.31 96.52) (layer Edge.Cuts) (width 0.15))
