@@ -1,4 +1,4 @@
-update=Fri 10 Nov 2017 07:08:58 PM EST
+update=11/19/2017 4:16:44 PM
 version=1
 last_client=kicad
 [pcbnew]
@@ -62,3 +62,4 @@ LibName30=atmel
 LibName31=contrib
 LibName32=valves
 LibName33=/home/lucky/Desktop/Formula/OEM_Preferred_Parts/schematic/formula
+LibName34=C:/Users/ljordan/Desktop/Olin/Formula/2017-18/OEM_Preferred_Parts/schematic/formula

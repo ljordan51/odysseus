@@ -31,6 +31,7 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
+LIBS:formula
 LIBS:odysseusShield-cache
 EELAYER 25 0
 EELAYER END
@@ -385,4 +386,108 @@ Text Label 1500 3850 0    60   ~ 0
 Joy2
 Text Label 1500 3950 0    60   ~ 0
 Joy1
+$Comp
+L LED_0805 D1
+U 1 1 5A11F581
+P 3265 3450
+F 0 "D1" H 3265 3350 50  0000 C CNN
+F 1 "LED_0805" H 3265 3550 50  0000 C CNN
+F 2 "footprints:LED_0805_OEM" H 3165 3450 50  0001 C CNN
+F 3 "http://www.osram-os.com/Graphics/XPic9/00078860_0.pdf" H 3265 3550 50  0001 C CNN
+F 4 "475-1410-1-ND" H 3265 3450 60  0001 C CNN "MPN"
+F 5 "Digi-Key" H 3265 3450 60  0001 C CNN "MFN"
+F 6 "Value" H 3265 3450 60  0001 C CNN "Package"
+F 7 "https://www.digikey.com/products/en?keywords=475-1410-1-ND" H 3665 3950 60  0001 C CNN "PurchasingLink"
+	1    3265 3450
+	0    -1   -1   0   
+$EndComp
+$Comp
+L LED_0805 D2
+U 1 1 5A11F61C
+P 3545 3450
+F 0 "D2" H 3545 3350 50  0000 C CNN
+F 1 "LED_0805" H 3545 3550 50  0000 C CNN
+F 2 "footprints:LED_0805_OEM" H 3445 3450 50  0001 C CNN
+F 3 "http://www.osram-os.com/Graphics/XPic9/00078860_0.pdf" H 3545 3550 50  0001 C CNN
+F 4 "475-1410-1-ND" H 3545 3450 60  0001 C CNN "MPN"
+F 5 "Digi-Key" H 3545 3450 60  0001 C CNN "MFN"
+F 6 "Value" H 3545 3450 60  0001 C CNN "Package"
+F 7 "https://www.digikey.com/products/en?keywords=475-1410-1-ND" H 3945 3950 60  0001 C CNN "PurchasingLink"
+	1    3545 3450
+	0    -1   -1   0   
+$EndComp
+$Comp
+L R_200 R3
+U 1 1 5A11F67F
+P 3265 3150
+F 0 "R3" V 3345 3150 50  0000 C CNN
+F 1 "R_200" V 3165 3150 50  0000 C CNN
+F 2 "footprints:R_0805_OEM" H 3195 3150 50  0001 C CNN
+F 3 "https://www.seielect.com/Catalog/SEI-RMCF_RMCP.pdf" H 3345 3150 50  0001 C CNN
+F 4 "Digi-Key" H 3265 3150 60  0001 C CNN "MFN"
+F 5 "RMCF0805JT200RCT-ND" H 3265 3150 60  0001 C CNN "MPN"
+F 6 "Value" H 3265 3150 60  0001 C CNN "Package"
+F 7 "https://www.digikey.com/products/en?keywords=RMCF0805JT200RCT-ND" H 3745 3550 60  0001 C CNN "PurchasingLink"
+	1    3265 3150
+	1    0    0    -1  
+$EndComp
+$Comp
+L +12V #PWR015
+U 1 1 5A11F88C
+P 3545 3000
+F 0 "#PWR015" H 3545 2850 50  0001 C CNN
+F 1 "+12V" H 3545 3140 50  0000 C CNN
+F 2 "" H 3545 3000 50  0001 C CNN
+F 3 "" H 3545 3000 50  0001 C CNN
+	1    3545 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L R_1k R4
+U 1 1 5A11F938
+P 3545 3150
+F 0 "R4" V 3625 3150 50  0000 C CNN
+F 1 "R_1k" V 3445 3150 50  0000 C CNN
+F 2 "footprints:R_0805_OEM" H 3475 3150 50  0001 C CNN
+F 3 "https://www.seielect.com/Catalog/SEI-rncp.pdf" H 3625 3150 50  0001 C CNN
+F 4 "Digi-Key" H 3545 3150 60  0001 C CNN "MFN"
+F 5 "RNCP0805FTD1K00CT-ND" H 3545 3150 60  0001 C CNN "MPN"
+F 6 "Value" H 3545 3150 60  0001 C CNN "Package"
+F 7 "https://www.digikey.com/products/en?keywords=RNCP0805FTD1K00CT-ND" H 4025 3550 60  0001 C CNN "PurchasingLink"
+	1    3545 3150
+	1    0    0    -1  
+$EndComp
+$Comp
+L VCC #PWR016
+U 1 1 5A11F995
+P 3265 3000
+F 0 "#PWR016" H 3265 2850 50  0001 C CNN
+F 1 "VCC" H 3265 3150 50  0000 C CNN
+F 2 "" H 3265 3000 50  0001 C CNN
+F 3 "" H 3265 3000 50  0001 C CNN
+	1    3265 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR017
+U 1 1 5A11F9BF
+P 3265 3600
+F 0 "#PWR017" H 3265 3350 50  0001 C CNN
+F 1 "GND" H 3265 3450 50  0000 C CNN
+F 2 "" H 3265 3600 50  0001 C CNN
+F 3 "" H 3265 3600 50  0001 C CNN
+	1    3265 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR018
+U 1 1 5A11F9E9
+P 3545 3600
+F 0 "#PWR018" H 3545 3350 50  0001 C CNN
+F 1 "GND" H 3545 3450 50  0000 C CNN
+F 2 "" H 3545 3600 50  0001 C CNN
+F 3 "" H 3545 3600 50  0001 C CNN
+	1    3545 3600
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
