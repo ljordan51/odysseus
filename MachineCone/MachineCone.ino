@@ -19,16 +19,16 @@ const int LIMIT_SWITCH_Z = 11;
 const int SPINDLE_ENABLE = 12;
 const int SPINDLE_DIRECTION = 13;
 
-const int mmMaxCutDepth = 3.175; // 1/8 in in each revolution
+const int mmMaxCutDepth = 1.5; // 1/8 in in each revolution
 const float mmPerRevHor = 1.5875; // 1/4-20 screws, .05 in per revolution, 1.27 mm per revolution
 const float mmPerRevVert = 8; // pitch 16 screws, .0625 in per rev, 1.5875 mm per rev
-const float coneHeight = 30; // part height in mm
-const float coneRadius = 15; // mm distance to move in overall during entire operation
+const float coneHeight = 40; // part height in mm
+const float coneRadius = 20; // mm distance to move in overall during entire operation
 const float bitSize = 0.313*25.4; // bit size inches * mm/in
-const float feedRate = 5; // vertical feed rate in mm/sec
-const int microX = 1;
+const float feedRate = 2.5; // vertical feed rate in mm/sec
+const int microX = 4;
 const int microY = 1;
-const int microZ = 1;
+const int microZ = 4;
 const int yAccel = 10;
 const int zAccel = 10;
 const int standardStepsPerRev = 200;
@@ -92,7 +92,7 @@ void setup()
 void loop()
 {
 
-  float rotationsPerSec = feedRate/(0.1*bitSize);
+  float rotationsPerSec = feedRate/(0.17*bitSize);
   int numCuts = ceil(coneRadius/mmMaxCutDepth);
   
   stepperX.setStepsPerMillimeter(standardStepsPerRev*microX/mmPerRevHor);
@@ -100,7 +100,7 @@ void loop()
   stepperZ.setStepsPerMillimeter(standardStepsPerRev*microZ/mmPerRevVert);
   // stepperX.setSpeedInMillimetersPerSecond(feedRate);
   stepperY.setSpeedInRevolutionsPerSecond(rotationsPerSec);
-  stepperZ.setSpeedInMillimetersPerSecond(feedRate);
+  // stepperZ.setSpeedInMillimetersPerSecond(feedRate);
   // stepperX.setAccelerationInRevolutionsPerSecondPerSecond(10);
   stepperY.setAccelerationInRevolutionsPerSecondPerSecond(yAccel);
   stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(zAccel);
@@ -114,10 +114,14 @@ void loop()
         cutDepth = coneRadius;
       }
 
-      stepperX.setSpeedInMillimetersPerSecond(feedRate*(cutDepth/coneHeight));
-      stepperX.setAccelerationInRevolutionsPerSecondPerSecond(yAccel*(cutDepth/coneHeight));
-      
+      stepperZ.setSpeedInMillimetersPerSecond(feedRate);
+
+      stepperX.setSpeedInMillimetersPerSecond(feedRate);
+      stepperX.setAccelerationInRevolutionsPerSecondPerSecond(5);
       stepperX.moveRelativeInMillimeters(cutDepth);
+
+      stepperX.setSpeedInMillimetersPerSecond(feedRate*(cutDepth/coneHeight));
+      stepperX.setAccelerationInRevolutionsPerSecondPerSecond(zAccel*(cutDepth/coneHeight));
 
       stepperX.setupRelativeMoveInMillimeters(-cutDepth);
       stepperY.setupRelativeMoveInRevolutions(numRotations);
@@ -129,6 +133,7 @@ void loop()
         stepperZ.processMovement();
       }
   
+      stepperZ.setSpeedInMillimetersPerSecond(3*feedRate);
       stepperZ.moveRelativeInMillimeters(-coneHeight);
     }
     notDone = false;

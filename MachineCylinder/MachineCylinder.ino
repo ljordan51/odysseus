@@ -22,8 +22,8 @@ const int SPINDLE_DIRECTION = 13;
 const int mmCutPerRotation = 1.5; // 1/8 in in each revolution
 const float mmPerRevHor = 1.5875; // 1/4-20 screws, .05 in per revolution, 1.27 mm per revolution
 const float mmPerRevVert = 8; // pitch 16 screws, .0625 in per rev, 1.5875 mm per rev
-const float partHeight = 50; // part height in mm
-const float totalCutDepth = 16; // mm distance to move in overall during entire operation
+const float partHeight = 75; // part height in mm
+const float totalCutDepth = 10; // mm distance to move in overall during entire operation
 const float bitSize = 0.313*25.4; // bit size inches * mm/in
 const float feedRate = 2.5; // vertical feed rate in mm/sec
 const int microX = 4;
@@ -89,7 +89,7 @@ void setup()
 void loop()
 {
 
-  float rotationsPerSec = feedRate/(0.25*bitSize);
+  float rotationsPerSec = feedRate/(0.17*bitSize);
   int numCuts = ceil(totalCutDepth/mmCutPerRotation);
   
   stepperX.setStepsPerMillimeter(standardStepsPerRev*microX/mmPerRevHor);
@@ -102,7 +102,7 @@ void loop()
   stepperY.setAccelerationInRevolutionsPerSecondPerSecond(10);
   stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(10);
 
-  float numRotations = (partHeight/feedRate)*rotationsPerSec;
+  float numRotations = (partHeight/feedRate)*rotationsPerSec + 10; // added 10 to just make 
 
   while(notDone){
     for(int i=0;i<numCuts;i++){

@@ -73,8 +73,8 @@ void setup()
 void loop()
 {
   stepperY.setStepsPerRevolution(200);
-  stepperY.setSpeedInRevolutionsPerSecond(0.5);
-  stepperY.setAccelerationInRevolutionsPerSecondPerSecond(10);
+  stepperY.setSpeedInRevolutionsPerSecond(5);
+  stepperY.setAccelerationInRevolutionsPerSecondPerSecond(1);
 
   stepperY.moveRelativeInRevolutions(100);
   
