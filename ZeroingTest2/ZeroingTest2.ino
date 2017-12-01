@@ -17,9 +17,9 @@ const int SPINDLE_ENABLE = 12; // not sure what pins 12 and 13 do
 const int SPINDLE_DIRECTION = 13;
 
 // set microstepping for each motor
-const int microX = 1;
+const int microX = 4;
 const int microY = 1;
-const int microZ = 1;
+const int microZ = 4;
 
 // set up other vars related to stepper movement
 const int standardStepsPerRev = 200; // default number of steps per revolution without microstepping
