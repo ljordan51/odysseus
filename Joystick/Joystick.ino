@@ -1,7 +1,7 @@
 //Initialize pins
-int xPin = A1;
-int yPin = A0;
-int buttonPin = A2;
+int xPin = A2;
+int yPin = A1;
+int buttonPin = A0;
 int zPin = A3;
 int extraPin = A4;
 int buttonPin2 = A5;

@@ -25,6 +25,7 @@ const int microZ = 4;
 const int standardStepsPerRev = 200; // default number of steps per revolution without microstepping
 const int setOrigSpeed = 1; // default stepper motor speed in revolutions per second for setting the origin
 const int setOrigAccel = 5; // default stepper motor acceleration in revolutions per second per second for setting the origin
+const int speedyDecel = 200; // changed acceleration to real fast so we get rid of bouncing on switching
 int dir = 0; // default direction of stepper motor movement for setting the origin (0 so there is no movement by default
 
 
@@ -35,14 +36,18 @@ FlexyStepper stepperZ;
 
 
 // Initialize joystick pins
-const int xPin = A1; // left right motion output
-const int zPin = A0; // up down motion output
-const int buttonPin = A2; // click output
+const int xPin = A2; // left right motion output
+const int zPin = A1; // up down motion output
+const int buttonPin = A0; // click output
 
 // Initialize variables for reading output values from joystick
 int xRead = 0;
 int zRead = 0;
 int buttonRead = 1;
+
+// Initialize variables for handling joystick behavior
+
+
 
 void setup() {
 
@@ -86,7 +91,7 @@ void loop() {
 void setOrigin(){
     // set stepper Z speed and acceleration
     stepperZ.setSpeedInRevolutionsPerSecond(setOrigSpeed);
-    stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(setOrigAccel);
+    stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
 
     
     Serial.println("Wait 2 seconds. Please don't click the joytstick until you are done zeroing the Z-Axis.");
@@ -97,30 +102,30 @@ void setOrigin(){
     while ( buttonRead ) {
       zRead = analogRead(zPin); // zero is around 460
       // set direction based on value of joystick
-      if (zRead > 480) {
+      if (zRead > 550) {
         dir = 1;
-        digitalWrite(STEPPERS_ENABLE, LOW);
-      } else if (zRead < 430) {
+      } else if (zRead < 500) {
         dir = -1;
-        digitalWrite(STEPPERS_ENABLE, LOW);
       } else {
         dir = 0;
-        digitalWrite(STEPPERS_ENABLE, HIGH);
       }
+      // Serial.println(dir);
+      // Serial.println(zRead);
       // set target position (either negative, positive, or 0)
       stepperZ.setTargetPositionRelativeInRevolutions(dir*150); // the number of revolutions is arbitrary (150 for now)
-      stepperZ.processMovement();
+      if(abs(dir)){
+        stepperZ.processMovement();
+      }
       buttonRead = digitalRead(buttonPin); // check if button is clicked
     }
 
     // reset values to defaults so next while loop behaves properly
     buttonRead = 1;
     dir = 0;
-    digitalWrite(STEPPERS_ENABLE, HIGH);
 
     // set stepper X speed and acceleration
     stepperX.setSpeedInRevolutionsPerSecond(setOrigSpeed);
-    stepperX.setAccelerationInRevolutionsPerSecondPerSecond(setOrigAccel);
+    stepperX.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
     
     Serial.println("Wait 2 seconds. Please don't click the joytstick until you are done zeroing the X-Axis.");
     delay(2000); // delay to make sure everything has time to settle, get back to default state, and user has time to stop messing with the joystick
@@ -130,22 +135,22 @@ void setOrigin(){
     while ( buttonRead ) {
       xRead = analogRead(xPin); // zero is around 430
       // set direction based on value of joystick
-      if (xRead > 450) {
+      if (xRead > 500) {
         dir = 1;
-        digitalWrite(STEPPERS_ENABLE, LOW);
-      } else if (xRead < 400) {
+      } else if (xRead < 450) {
         dir = -1;
-        digitalWrite(STEPPERS_ENABLE, LOW);
       } else {
         dir = 0;
-        digitalWrite(STEPPERS_ENABLE, HIGH);
       }
+      // Serial.println(dir);
+      // Serial.println(xRead);
       // set target position (either negative, positive, or 0)
       stepperX.setTargetPositionRelativeInRevolutions(dir*150); // the number of revolutions is arbitrary (150 for now)
-      stepperX.processMovement();
+      if(abs(dir)){
+        stepperX.processMovement();
+      }
       buttonRead = digitalRead(buttonPin); // check if button is clicked
     }
-    digitalWrite(STEPPERS_ENABLE, LOW); // make sure steppers are enabled
     Serial.println("Great job zeroing the cutter!");
 }
 
