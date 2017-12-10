@@ -17,7 +17,7 @@ const int SPINDLE_ENABLE = 12; // not sure what pins 12 and 13 do
 const int SPINDLE_DIRECTION = 13;
 
 // set microstepping for each motor
-const int microX = 4;
+const int microX = 1;
 const int microY = 1;
 const int microZ = 4;
 
@@ -25,15 +25,16 @@ const int microZ = 4;
 const int standardStepsPerRev = 200; // default number of steps per revolution without microstepping
 const int setOrigSpeed = 1; // default stepper motor speed in revolutions per second for setting the origin
 const int setOrigAccel = 5; // default stepper motor acceleration in revolutions per second per second for setting the origin
+const int speedyDecel = 200; // changed acceleration to real fast so we get rid of bouncing on switching
 int dir = 0; // default direction of stepper motor movement for setting the origin (0 so there is no movement by default
 
 // set some constants for machining
 const int mmCutPerRotation = 1.5; // 1/8 in in each revolution
 const float mmPerRevHor = 1.5875; // 1/4-20 screws, .05 in per revolution, 1.27 mm per revolution
 const float mmPerRevVert = 8; // pitch 16 screws, .0625 in per rev, 1.5875 mm per rev
-const float sphereDiam = 50; // sphere diameter in mm
+const float sphereDiam = 20; // sphere diameter in mm
 const float bitSize = 0.313*25.4; // bit size inches * mm/in
-const float feedRate = 2.5; // vertical feed rate in mm/sec
+const float feedRate = 2; // vertical feed rate in mm/sec
 const int zAccel = 10;
 
 // create the stepper motor objects
@@ -43,14 +44,17 @@ FlexyStepper stepperZ;
 
 
 // Initialize joystick pins
-const int xPin = A0; // left right motion output
+const int xPin = A2; // left right motion output
 const int zPin = A1; // up down motion output
-const int buttonPin = A2; // click output
+const int buttonPin = A0; // click output
 
 // Initialize variables for reading output values from joystick
 int xRead = 0;
 int zRead = 0;
 int buttonRead = 1;
+
+// Initialize var for handling accel calcs
+float lastZVel = 0;
 
 void setup() {
 
@@ -79,7 +83,7 @@ void setup() {
   stepperZ.setStepsPerRevolution(standardStepsPerRev*microZ);
 
   // set the origin
-  setOrigin();
+  // setOrigin();
 
   // wait for user input to move on to main loop
   Serial.println();
@@ -90,24 +94,35 @@ void setup() {
 void loop() {
   stepperX.setCurrentPositionInMillimeters(0);
   stepperZ.setCurrentPositionInMillimeters(0);
+  stepperX.setStepsPerMillimeter(standardStepsPerRev*microX/mmPerRevHor);
+  stepperZ.setStepsPerMillimeter(standardStepsPerRev*microZ/mmPerRevVert);
   stepperZ.setTargetPositionInMillimeters(sphereDiam);
+  stepperX.setSpeedInMillimetersPerSecond(feedRate);
   stepperZ.setSpeedInMillimetersPerSecond(feedRate);
   stepperZ.setAccelerationInMillimetersPerSecondPerSecond(zAccel);
-  stepperX.setTargetPositionInMillimeters(-sphereDiam/2);
-  while((!stepperX.motionComplete()) || (!stepperZ.motionComplete())){
-    if(stepperX.motionComplete()){
-      stepperX.setTargetPositionInMillimeters(0);
-    }
+  stepperX.setTargetPositionInMillimeters(sphereDiam/2);
+  while((!stepperX.motionComplete()) || (!stepperZ.motionComplete())){ 
+    
     float zVel = stepperZ.getCurrentVelocityInMillimetersPerSecond();
     float zPos = stepperZ.getCurrentPositionInMillimeters();
-    int zAcc = zAccel;
-    if(zVel = feedRate){
-      int zAcc = 0;
+    if(zPos > (sphereDiam/2)){
+      stepperX.setTargetPositionInMillimeters(0);
+      while(1){
+        Serial.println("Odysseus...");
+      }
     }
+    int zAcc = zAccel;
+    if(zVel == feedRate){
+      zAcc = 0;
+    }
+    lastZVel = zVel;
     float xPos = stepperX.getCurrentPositionInMillimeters();
+    if(xPos == 0){
+      xPos = 0.01;
+    }
     float xVel = stepperX.getCurrentVelocityInMillimetersPerSecond();
-    stepperX.setSpeedInMillimetersPerSecond((-zPos/xPos)*zVel);
-    stepperX.setAccelerationInMillimetersPerSecondPerSecond(-(zVel+zAcc+xVel)/xPos);
+    stepperX.setSpeedInMillimetersPerSecond((zPos/xPos)*zVel);
+    stepperX.setAccelerationInMillimetersPerSecondPerSecond((zVel+zAcc+xVel)/xPos);
     stepperX.processMovement();
     stepperZ.processMovement();
   }
@@ -119,11 +134,8 @@ void loop() {
 void setOrigin(){
     // set stepper Z speed and acceleration
     stepperZ.setSpeedInRevolutionsPerSecond(setOrigSpeed);
-    stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(setOrigAccel);
+    stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
 
-    
-    Serial.println("Wait 2 seconds. Please don't click the joytstick until you are done zeroing the Z-Axis.");
-    delay(2000); // delay to make sure everything has time to settle, get back to default state, and user has time to stop messing with the joystick
     Serial.println("Now zero the Z-Axis by moving the joystick up and down. Click the joystick when you are done to zero the X-Axis.");
 
     // allow user to manipulate z-axis until button is clicked
@@ -132,31 +144,28 @@ void setOrigin(){
       // set direction based on value of joystick
       if (zRead > 550) {
         dir = 1;
-        digitalWrite(STEPPERS_ENABLE, LOW);
       } else if (zRead < 500) {
         dir = -1;
-        digitalWrite(STEPPERS_ENABLE, LOW);
       } else {
         dir = 0;
-        digitalWrite(STEPPERS_ENABLE, HIGH);
       }
       // set target position (either negative, positive, or 0)
       stepperZ.setTargetPositionRelativeInRevolutions(dir*150); // the number of revolutions is arbitrary (150 for now)
-      stepperZ.processMovement();
+      if(abs(dir)){
+        stepperZ.processMovement();
+      }
       buttonRead = digitalRead(buttonPin); // check if button is clicked
     }
 
     // reset values to defaults so next while loop behaves properly
     buttonRead = 1;
     dir = 0;
-    digitalWrite(STEPPERS_ENABLE, HIGH);
 
     // set stepper X speed and acceleration
     stepperX.setSpeedInRevolutionsPerSecond(setOrigSpeed);
-    stepperX.setAccelerationInRevolutionsPerSecondPerSecond(setOrigAccel);
-    
-    Serial.println("Wait 2 seconds. Please don't click the joytstick until you are done zeroing the X-Axis.");
-    delay(2000); // delay to make sure everything has time to settle, get back to default state, and user has time to stop messing with the joystick
+    stepperX.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
+
+    delay(1000);
     Serial.println("Now zero the X-Axis by moving the joystick left and right. Click the joystick when you are done.");
 
     // allow user to manipulate x-axis until button is clicked
@@ -165,20 +174,18 @@ void setOrigin(){
       // set direction based on value of joystick
       if (xRead > 500) {
         dir = 1;
-        digitalWrite(STEPPERS_ENABLE, LOW);
       } else if (xRead < 450) {
         dir = -1;
-        digitalWrite(STEPPERS_ENABLE, LOW);
       } else {
         dir = 0;
-        digitalWrite(STEPPERS_ENABLE, HIGH);
       }
       // set target position (either negative, positive, or 0)
       stepperX.setTargetPositionRelativeInRevolutions(dir*150); // the number of revolutions is arbitrary (150 for now)
-      stepperX.processMovement();
+      if(abs(dir)){
+        stepperX.processMovement();
+      }
       buttonRead = digitalRead(buttonPin); // check if button is clicked
     }
-    digitalWrite(STEPPERS_ENABLE, LOW); // make sure steppers are enabled
     Serial.println("Great job zeroing the cutter!");
 }
 

@@ -45,10 +45,6 @@ int xRead = 0;
 int zRead = 0;
 int buttonRead = 1;
 
-// Initialize variables for handling joystick behavior
-
-
-
 void setup() {
 
   Serial.begin(9600);

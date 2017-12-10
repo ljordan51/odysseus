@@ -67,16 +67,16 @@ void setup()
   Serial.println ("Hit a key to start");     // signal initalization done
   while(Serial.available() == 0){}
 }
-//
-//
-//
+
+
+
 void loop()
 {
   stepperX.setStepsPerRevolution(800);
   stepperX.setSpeedInRevolutionsPerSecond(5);
   stepperX.setAccelerationInRevolutionsPerSecondPerSecond(1);
 
-  stepperX.moveRelativeInRevolutions(-100);
+  stepperX.moveRelativeInRevolutions(100);
   
 }
 
