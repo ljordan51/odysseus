@@ -19,7 +19,7 @@ const int SPINDLE_DIRECTION = 13;
 // set microstepping for each motor
 const int microX = 1;
 const int microY = 1;
-const int microZ = 4;
+const int microZ = 1;
 
 // set up other vars related to stepper movement
 const int standardStepsPerRev = 200; // default number of steps per revolution without microstepping
@@ -31,17 +31,18 @@ int dir = 0; // default direction of stepper motor movement for setting the orig
 // set some constants for machining
 const int mmCutPerRotation = 1.5; // 1/8 in in each revolution
 const float mmPerRevHor = 1.5875; // 1/4-20 screws, .05 in per revolution, 1.27 mm per revolution
+const float maxXSpeed = 15; // maximum x speed in mm/sec
 const float mmPerRevVert = 8; // pitch 16 screws, .0625 in per rev, 1.5875 mm per rev
-const float sphereDiam = 20; // sphere diameter in mm
+const float maxYSpeed = 35; // maximum y speed in mm/sec
+const float sphereDiam = 74; // sphere diameter in mm
 const float bitSize = 0.313*25.4; // bit size inches * mm/in
-const float feedRate = 2; // vertical feed rate in mm/sec
+const float feedRate = 6; // vertical feed rate in mm/sec
 const int zAccel = 10;
 
 // create the stepper motor objects
 FlexyStepper stepperX;
 FlexyStepper stepperY;
 FlexyStepper stepperZ;
-
 
 // Initialize joystick pins
 const int xPin = A2; // left right motion output
@@ -53,8 +54,7 @@ int xRead = 0;
 int zRead = 0;
 int buttonRead = 1;
 
-// Initialize var for handling accel calcs
-float lastZVel = 0;
+bool once = true;
 
 void setup() {
 
@@ -92,37 +92,32 @@ void setup() {
 }
 
 void loop() {
-  stepperX.setCurrentPositionInMillimeters(0);
-  stepperZ.setCurrentPositionInMillimeters(0);
+  stepperX.setCurrentPositionInMillimeters(0.01);
+  stepperZ.setCurrentPositionInMillimeters(0.01);
   stepperX.setStepsPerMillimeter(standardStepsPerRev*microX/mmPerRevHor);
   stepperZ.setStepsPerMillimeter(standardStepsPerRev*microZ/mmPerRevVert);
   stepperZ.setTargetPositionInMillimeters(sphereDiam);
   stepperX.setSpeedInMillimetersPerSecond(feedRate);
   stepperZ.setSpeedInMillimetersPerSecond(feedRate);
-  stepperZ.setAccelerationInMillimetersPerSecondPerSecond(zAccel);
+  stepperZ.setAccelerationInMillimetersPerSecondPerSecond(speedyDecel);
   stepperX.setTargetPositionInMillimeters(sphereDiam/2);
   while((!stepperX.motionComplete()) || (!stepperZ.motionComplete())){ 
     
     float zVel = stepperZ.getCurrentVelocityInMillimetersPerSecond();
     float zPos = stepperZ.getCurrentPositionInMillimeters();
+    float zSpeed = sin(zPos*3.14/sphereDiam)*feedRate;
+    stepperZ.setSpeedInMillimetersPerSecond(zSpeed);
     if(zPos > (sphereDiam/2)){
       stepperX.setTargetPositionInMillimeters(0);
-      while(1){
-        Serial.println("Odysseus...");
-      }
     }
-    int zAcc = zAccel;
-    if(zVel == feedRate){
-      zAcc = 0;
-    }
-    lastZVel = zVel;
     float xPos = stepperX.getCurrentPositionInMillimeters();
-    if(xPos == 0){
-      xPos = 0.01;
-    }
     float xVel = stepperX.getCurrentVelocityInMillimetersPerSecond();
-    stepperX.setSpeedInMillimetersPerSecond((zPos/xPos)*zVel);
-    stepperX.setAccelerationInMillimetersPerSecondPerSecond((zVel+zAcc+xVel)/xPos);
+    float xSpeed = abs(((zPos-sphereDiam/2)/xPos)*zSpeed);
+    if(xSpeed > maxXSpeed){
+      xSpeed = maxXSpeed;
+    }
+    stepperX.setSpeedInMillimetersPerSecond(xSpeed);
+    stepperX.setAccelerationInMillimetersPerSecondPerSecond(speedyDecel);
     stepperX.processMovement();
     stepperZ.processMovement();
   }
@@ -133,7 +128,7 @@ void loop() {
 
 void setOrigin(){
     // set stepper Z speed and acceleration
-    stepperZ.setSpeedInRevolutionsPerSecond(setOrigSpeed);
+    stepperZ.setSpeedInMillimetersPerSecond(setOrigSpeed);
     stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
 
     Serial.println("Now zero the Z-Axis by moving the joystick up and down. Click the joystick when you are done to zero the X-Axis.");
