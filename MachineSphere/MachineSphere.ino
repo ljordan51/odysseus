@@ -112,7 +112,7 @@ void loop() {
     }
     float xPos = stepperX.getCurrentPositionInMillimeters();
     float xVel = stepperX.getCurrentVelocityInMillimetersPerSecond();
-    float xSpeed = abs(((zPos-sphereDiam/2)/xPos)*zSpeed);
+    float xSpeed = abs(((zPos-sphereDiam/2)/xPos)*zVel);
     if(xSpeed > maxXSpeed){
       xSpeed = maxXSpeed;
     }
