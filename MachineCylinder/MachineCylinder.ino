@@ -26,9 +26,9 @@ const float partHeight = 30; // part height in mm
 const float totalCutDepth = 8; // mm distance to move in overall during entire operation
 const float bitSize = 0.313*25.4; // bit size inches * mm/in
 const float feedRate = 2.5; // vertical feed rate in mm/sec
-const int microX = 4;
+const int microX = 1;
 const int microY = 1;
-const int microZ = 4;
+const int microZ = 1;
 const int standardStepsPerRev = 200;
 
 bool notDone = true;
@@ -111,7 +111,7 @@ void loop()
       if(i==numCuts-1){
         cutDepth = (totalCutDepth/mmCutPerRotation-floor(totalCutDepth/mmCutPerRotation))*mmCutPerRotation;
       }
-      stepperX.moveRelativeInMillimeters(cutDepth);
+      stepperX.moveRelativeInMillimeters(-cutDepth);
       
       stepperY.setupRelativeMoveInRevolutions(numRotations);
       stepperZ.setupRelativeMoveInMillimeters(partHeight);

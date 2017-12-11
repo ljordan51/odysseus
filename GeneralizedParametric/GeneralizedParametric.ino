@@ -37,7 +37,8 @@ const float maxYSpeed = 35; // maximum y speed in mm/sec
 const float partHeight = 74; // sphere diameter in mm
 const float bitSize = 0.313*25.4; // bit size inches * mm/in
 const float feedRate = 6; // vertical feed rate in mm/sec
-const int zAccel = 10;
+const float feedRateFacing = 2.5; // horizontal feed rate in mm/sec
+const int maximum_travel = 60; // maximum travel of x-axis backward from origin in mm
 
 // create the stepper motor objects
 FlexyStepper stepperX;
@@ -50,8 +51,7 @@ const int zPin = A1; // up down motion output
 const int buttonPin = A0; // click output
 
 // Initialize variables for reading output values from joystick
-int xRead = 0;
-int zRead = 0;
+int Read = 0;
 int buttonRead = 1;
 
 bool once = true;
@@ -82,8 +82,12 @@ void setup() {
   stepperY.setStepsPerRevolution(standardStepsPerRev*microY);
   stepperZ.setStepsPerRevolution(standardStepsPerRev*microZ);
 
+  // set steps per millimeter
+  stepperX.setStepsPerMillimeter(standardStepsPerRev*microX/mmPerRevHor);
+  stepperZ.setStepsPerMillimeter(standardStepsPerRev*microZ/mmPerRevVert);
+
   // set the origin
-  // setOrigin();
+  setOrigin();
 
   // wait for user input to move on to main loop
   Serial.println();
@@ -91,48 +95,10 @@ void setup() {
   while(Serial.available() == 0){}
 }
 
-struct results {
-  float min_x;
-  float max_x;
-};
-
-// find min, max, convex, concave points
-struct results characteristics(){
-  bool first_time = 1;
-  float max_x = 0;
-  float min_x = 0;
-  for(int i = 0; i < partHeight; i++){
-    float this_x = equation(i);
-    if(first_time){
-      max_x = this_x;
-      min_x = this_x;
-      first_time = 0;
-    } else {
-      if(this_x > max_x){
-        max_x = this_x;
-      } else if(this_x < min_x){
-        min_x = this_x;
-      }
-    }
-  }
-  struct results result;
-  result.max_x = max_x;
-  result.min_x = min_x;
-  return result;
-}
-
 void loop() {
-  struct results result;
-  result = characteristics();
-  Serial.println(result.max_x);
-  Serial.println(result.min_x);
   while(1){
-    // Serial.println("Odysseus...");
+    Serial.println("Odysseus...");
   }
-}
-
-bool isValid(){
-  // TODO
 }
 
 float equation(float y){
@@ -140,61 +106,107 @@ float equation(float y){
   return x;
 }
 
-void setOrigin(){
-    // set stepper Z speed and acceleration
-    stepperZ.setSpeedInMillimetersPerSecond(setOrigSpeed);
-    stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
+void face(float facing_depth){
+  
+  stepperX.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
+  stepperZ.setSpeedInMillimetersPerSecond(1);
+  stepperZ.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
+  float facing_bit_length = 10; // facing bit length in mm
+  float rotationsPerSec = feedRateFacing/(0.17*facing_bit_length);
+  stepperY.setSpeedInRevolutionsPerSecond(rotationsPerSec);
+  stepperY.setAccelerationInRevolutionsPerSecondPerSecond(10);
 
-    Serial.println("Now zero the Z-Axis by moving the joystick up and down. Click the joystick when you are done to zero the X-Axis.");
+  float start = stepperX.getCurrentPositionInMillimeters();
+  float numRotations = (start/feedRateFacing)*rotationsPerSec + 2;
+
+  int numCuts = ceil(facing_depth/mmCutPerRotation);
+
+  for (int i = 0; i < numCuts; i++){
+    stepperX.setSpeedInMillimetersPerSecond(feedRateFacing);
+    float cutDepth = mmCutPerRotation;
+    if(i==(numCuts-1)){
+      cutDepth = (facing_depth/mmCutPerRotation-floor(facing_depth/mmCutPerRotation))*mmCutPerRotation;
+    }
+    stepperZ.moveRelativeInMillimeters(cutDepth);
+
+    stepperY.setTargetPositionRelativeInRevolutions(numRotations);
+    stepperX.setTargetPositionInMillimeters(0);
+
+    while((!stepperY.motionComplete()) || (!stepperX.motionComplete())){
+        stepperY.processMovement();
+        stepperX.processMovement();
+    }
+    stepperX.setSpeedInMillimetersPerSecond(8);
+    stepperX.moveToPositionInMillimeters(start);
+  }
+}
+
+void joystickControl(FlexyStepper stepper, int pin, int max_val, int min_val){
+  stepper.setSpeedInRevolutionsPerSecond(setOrigSpeed);
+  stepper.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
+
+  while ( buttonRead ) {
+      Read = analogRead(pin); // zero is around 460
+      // set direction based on value of joystick
+      if (Read > max_val) {
+        dir = 1;
+      } else if (Read < min_val) {
+        dir = -1;
+      } else {
+        dir = 0;
+      }
+      // set target position (either negative, positive, or 0)
+      stepper.setTargetPositionRelativeInRevolutions(dir*150); // the number of revolutions is arbitrary (150 for now)
+      if(abs(dir)){
+        stepper.processMovement();
+      }
+      buttonRead = digitalRead(buttonPin); // check if button is clicked
+  }
+
+  // reset values to defaults so next while loop behaves properly
+  buttonRead = 1;
+  dir = 0;
+}
+
+void setOrigin(){
+    Serial.println("Raise the Z-Axis above the maximum height of the stock. Click the joystick when you are done.");
 
     // allow user to manipulate z-axis until button is clicked
-    while ( buttonRead ) {
-      zRead = analogRead(zPin); // zero is around 460
-      // set direction based on value of joystick
-      if (zRead > 550) {
-        dir = 1;
-      } else if (zRead < 500) {
-        dir = -1;
-      } else {
-        dir = 0;
-      }
-      // set target position (either negative, positive, or 0)
-      stepperZ.setTargetPositionRelativeInRevolutions(dir*150); // the number of revolutions is arbitrary (150 for now)
-      if(abs(dir)){
-        stepperZ.processMovement();
-      }
-      buttonRead = digitalRead(buttonPin); // check if button is clicked
-    }
-
-    // reset values to defaults so next while loop behaves properly
-    buttonRead = 1;
-    dir = 0;
-
-    // set stepper X speed and acceleration
-    stepperX.setSpeedInRevolutionsPerSecond(setOrigSpeed);
-    stepperX.setAccelerationInRevolutionsPerSecondPerSecond(speedyDecel);
+    joystickControl(stepperZ, zPin, 550, 500);
 
     delay(1000);
-    Serial.println("Now zero the X-Axis by moving the joystick left and right. Click the joystick when you are done.");
+    Serial.println("Now zero the X-Axis by moving the joystick so the tape on the dremel is flush with the face of the front plate. Click the joystick when you are done.");
 
     // allow user to manipulate x-axis until button is clicked
-    while ( buttonRead ) {
-      xRead = analogRead(xPin); // zero is around 430
-      // set direction based on value of joystick
-      if (xRead > 500) {
-        dir = 1;
-      } else if (xRead < 450) {
-        dir = -1;
-      } else {
-        dir = 0;
-      }
-      // set target position (either negative, positive, or 0)
-      stepperX.setTargetPositionRelativeInRevolutions(dir*150); // the number of revolutions is arbitrary (150 for now)
-      if(abs(dir)){
-        stepperX.processMovement();
-      }
-      buttonRead = digitalRead(buttonPin); // check if button is clicked
+    joystickControl(stepperX, xPin, 500, 450);
+
+    stepperX.setCurrentPositionInMillimeters(0.01);
+
+    Serial.println("Now enter the maximum radius of your stock (mm) from the center of the chuck.");
+    float r = 0;
+    while(r == 0){
+      r = Serial.parseFloat();
     }
-    Serial.println("Great job zeroing the cutter!");
+    while(r > maximum_travel || r == 0){
+      Serial.println("My maximum travel is 60 mm. Please enter a maximum radius smaller than that or change your stock to a smaller size.");
+      while(r > maximum_travel || r == 0){
+        r = Serial.parseFloat();
+      }
+    }
+
+    stepperX.moveToPositionInMillimeters(r);
+
+    Serial.println("Now lower the Z-Axis until the bottom of the cutting bit is flush with the top of the stock. Click the joystick when you are done.");
+    // allow user to manipulate x-axis until button is clicked
+    joystickControl(stepperZ, zPin, 550, 500);
+
+    Serial.println("Now enter a value (mm) to face off the top of your stock.");
+    float facing_depth = 0;
+    while(facing_depth == 0){
+      facing_depth = Serial.parseFloat();
+    }
+    face(facing_depth);
+
+    stepperZ.setCurrentPositionInMillimeters(0.01);
 }
 
