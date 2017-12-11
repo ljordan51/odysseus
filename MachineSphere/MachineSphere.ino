@@ -100,23 +100,26 @@ void loop() {
   stepperX.setSpeedInMillimetersPerSecond(feedRate);
   stepperZ.setSpeedInMillimetersPerSecond(feedRate);
   stepperZ.setAccelerationInMillimetersPerSecondPerSecond(speedyDecel);
-  stepperX.setTargetPositionInMillimeters(sphereDiam/2);
-  while((!stepperX.motionComplete()) || (!stepperZ.motionComplete())){ 
+  while((!stepperZ.motionComplete())){ 
     
     float zVel = stepperZ.getCurrentVelocityInMillimetersPerSecond();
     float zPos = stepperZ.getCurrentPositionInMillimeters();
     float zSpeed = sin(zPos*3.14/sphereDiam)*feedRate;
     stepperZ.setSpeedInMillimetersPerSecond(zSpeed);
-    if(zPos > (sphereDiam/2)){
-      stepperX.setTargetPositionInMillimeters(0);
-    }
     float xPos = stepperX.getCurrentPositionInMillimeters();
     float xVel = stepperX.getCurrentVelocityInMillimetersPerSecond();
-    float xSpeed = abs(((zPos-sphereDiam/2)/xPos)*zVel);
-    if(xSpeed > maxXSpeed){
+    float xSpeed = ((zPos-sphereDiam/2)/xPos)*zVel;
+    if(xSpeed < 0){
+      stepperX.setTargetPositionInMillimeters(100);
+    } else if(xSpeed > 0) {
+      stepperX.setTargetPositionInMillimeters(0);
+    } else {
+      stepperX.setTargetPositionInMillimeters(xPos);
+    }
+    if(abs(xSpeed) > maxXSpeed){
       xSpeed = maxXSpeed;
     }
-    stepperX.setSpeedInMillimetersPerSecond(xSpeed);
+    stepperX.setSpeedInMillimetersPerSecond(abs(xSpeed));
     stepperX.setAccelerationInMillimetersPerSecondPerSecond(speedyDecel);
     stepperX.processMovement();
     stepperZ.processMovement();
